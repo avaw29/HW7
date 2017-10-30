@@ -81,32 +81,29 @@ except:
 
 def cache_tweet(search):
 
-    if search in CACHE_DICTION:
-        print("Data was in the cache")
-        return CACHE_DICTION[search]
-    else:
-        print("Making a request for new data...")
-        uh = urllib.request.urlopen(url)
-        data = uh.read().decode()
-        try:
-            CACHE_DICTION[search] =  json.loads(data)
-            dumped_json_cache = json.dumps(CACHE_DICTION)
-            fw = open(CACHE_FNAME,"w")
-            fw.write(dumped_json_cache)
-            fw.close() # Close the open file
-            return CACHE_DICTION[search]
-        except:
-            print("Wasn't in cache and wasn't valid search either")
-            return None
+	if search in CACHE_DICTION:
+		r = CACHE_DICTION[search]
+	else:
+		r = api.search(s = search)
+		CACHE_DICTION[search] = r
+		f = open(cache_fname, 'w')
+		f.write(json.dumps(CACHE_DICTION))
+		f.close()
 
+	stat = r['statuses']
+
+	return stat
 
 ## 3. Using a loop, invoke your function, save the return value in a variable, and explore the
 ##		data you got back!
-while True:
-    search_for = input["Enter Tweet term:"]
-    if len(search_for) < 1: break
-    data = cache_tweet(search_for)
-    
+search_for = input("Enter term:")
+tweets = cache_tweet(search_for)
+
+for t in tweets[0:5]:
+	print ("TEXT: " + t['text'])
+	print ("CREATED AT: " + t['created_at'])
+	print ("\n")
+
 
 ## 4. With what you learn from the data -- e.g. how exactly to find the
 ##		text of each tweet in the big nested structure -- write code to print out
